@@ -1,0 +1,112 @@
+﻿<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Multi-select Dropdown List with Checkbox by CodexWorld</title>
+    <script src="jquery-1.7.1.js"></script>
+    <script src="AutoCompleteUI.js"></script>
+    <link href="AutoComplete.css" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Open Sans' Arial, Helvetica, sans-serif;
+        }
+
+        ul, li {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .label {
+            color: #000;
+            font-size: 16px;
+        }
+    </style>
+
+</head>
+<body>
+    <textarea class="search-element"></textarea>
+    <script type="text/javascript">
+        var data = ["Reduce pain to below BASELINE level within 48 hours of admission for comfort. Patient/pcg is knowledgeable about pain, other symptoms regimen, relief measures and care for optimal relief/control.",
+                "Reduce pain level to  below  3 or stated comfort level of pain by patient after nursing interventions/medications",
+                "Family/PCG will verbalize understanding of non-verbal signs of pain.", "Keep pain below BASELINE level", "Pain will remain in comfortable level during care.",
+                "Pain level will be assessed effectively by family/pcg and staff.", "Pt/family understands levels of pain and breakthrough pain.",
+                "Pt/pcg will verbalize pain level for proper adn appropriate medication doses"];
+        $(function () {
+            var selectedItems = [];
+            var $this;
+            var options = {
+                minLength: 0,
+                source: function (request, response) {
+                    // delegate back to autocomplete, but extract the last term
+
+                    //response($.ui.autocomplete.filter(data, extractLast(request.term)));
+                    response($.map(data, function (item) {
+
+                        return {
+                            label: item
+                        }
+                    }));
+                },
+                focus: function () {
+                    // prevent value inserted on focus
+                    //$($this).autocomplete("search");
+                    return false;
+                },
+                select: function (event, ui) {
+                    debugger
+                    var text = $this.val();
+                    //ui.item.value = ui.item.value.replace(/\+/g, ' ');
+                    text = text == null || text == undefined ? "" : text;
+                    var checked = (text.indexOf(ui.item.value + ',') > -1 ? 'checked' : '');
+                    if (checked == 'checked') {
+                        this.value = this.value.replace(ui.item.value + ',\n', '')
+                    }
+                    else {
+                        var terms = split(this.value);
+                        console.log(terms)
+                        // remove the current input
+                        terms.pop();
+                        // add the selected item
+                        terms.push(ui.item.value);
+                        // add placeholder to get the comma-and-space at the end
+                        terms.push("");
+                        this.value = terms.join(",\n");
+                    }
+                    return false;
+                },
+                open: function () {
+                    $("ul.ui-menu").width($(this).innerWidth());
+                }
+            }
+            $('textarea[class*="search-element"]').live('keydown', function () {
+                bindAutoComplete($this, options);
+            }).live('focus', function () {
+                $this = $(this);
+                var text = $this.val();
+                bindAutoComplete($this, options);
+                $($this).autocomplete("search");
+            })
+
+        })
+        function bindAutoComplete(ele, options) {
+            var text = ele.val();
+            text = text == null || text == undefined ? "" : text;
+            $(ele).autocomplete(options).data("autocomplete")._renderItem = function (ul, item) {
+                var checked = (text.indexOf(item.label + ',') > -1 ? 'checked' : '');
+                return $("<li></li>")
+                    .data("item.autocomplete", item)
+                    .append('<a href="javascript:;"><input type="checkbox"' + checked + '/>' + item.label + '</a>')
+                    .appendTo(ul);
+            };
+        }
+        function split(val) {
+            return val.split(/,\n\s*/);
+        }
+        function extractLast(term) {
+            return split(term).pop();
+        }
+    </script>
+
+</body>
+</html>
